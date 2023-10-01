@@ -6,7 +6,7 @@ const TelegramBot = require('node-telegram-bot-api');
 // ID користувача, на якого ви хочете пересилати повідомлення
 const toUserId = ['541560601', '1409195627', '1063445489']; // Замініть на ID цільового користувача
 
-// Створення бота
+// 1Створення бота
 // const bot = new TelegramBot(token, { polling: true });
 //
 // // Обробка текстових повідомлень від користувачів
@@ -79,18 +79,24 @@ bot.on('video', (msg) => {
 });
 
 function handleMedia(msg, mediaType) {
+    const userId = msg.from.id;
     const chatId = msg.chat.id;
-
+    const currentTime = Date.now();
+    const lastSentTime = lastSentTimestamp[userId] || 0;
+    const timeDifference = currentTime - lastSentTime;
     // Відправка медіа до цільового користувача
+    if (timeDifference >= 1000) {
     toUserId.forEach((toUserId)=>{
     bot.forwardMessage(toUserId, chatId, msg.message_id)
         .then(() => {
-            bot.sendMessage(chatId, `Ваше ${mediaType} було надіслано.`);
+            lastSentTimestamp[userId] = currentTime;
+             // bot.sendMessage(chatId, `Ваше ${mediaType} було надіслано.`);
         })
         .catch((error) => {
             console.error(`Помилка при пересиланні ${mediaType}: ${error.message}`);
         });
     })
+}
 }
 
 console.log('Бот запущений');
